@@ -154,52 +154,45 @@ static __strong dispatch_queue_t serialQueue ;
                         andTime:(NSString*)time
                        onFinish:(void (^)(BOOL, NSString *)) finish {
 
-    dispatch_async(concurrencyQueue, ^{
+    [self run_async_with_UI:^{
 
         [self executeUpdateOnDBwithSQLParams: INSERT_INTO_PORTFOLIOS,
          @"portfolio", portfolioNum, performance, aum, currency, json, time];
-        
         finish(true, portfolioNum); //synced
-    });
+    }];
 }
 
 
 -(void)deletePorfolioWithPtNum:(NSString*)ptNum
                       onFinish:(void (^)(BOOL, NSString *)) finish{
     
-    dispatch_barrier_async(concurrencyQueue, ^{
- 
-        [self executeUpdateOnDBwithSQLParams: DELETE_FROM_PORTFOLIOS_WHERE_PTNUM, ptNum];
+    [self run_barrier_async_with_UI:^{
         
+        [self executeUpdateOnDBwithSQLParams: DELETE_FROM_PORTFOLIOS_WHERE_PTNUM, ptNum];
         finish(true, ptNum);
-    });
-    
+    }];
 }
 
 
 -(void)deleteAllPortfoliosFromDB: (void (^)(BOOL)) deleted {
     
-    dispatch_barrier_async(concurrencyQueue, ^{
-        
+    [self run_barrier_async_with_UI:^{
+            
         [self executeUpdateOnDBwithSQLParams: DELETE_ALL_PORTFOLIOS];
         deleted(true);
-    });
+    }];
 }
 
 
 -(void)getPortfolios:(void (^)(NSArray*)) finish {
     
-     NSLog(@"getPortfolios <--");
-    
-    __block NSArray * allPortfolios;
-    
-    dispatch_barrier_async(concurrencyQueue, ^{
+    [self run_barrier_async_with_UI:^{
         
+        __block NSArray * allPortfolios;
         allPortfolios = [self getAllPortfolios];
         finish(allPortfolios);
-    });
-    
-    NSLog(@"getPortfolios -->");
+        
+    }];
 }
 
 
@@ -211,14 +204,13 @@ static __strong dispatch_queue_t serialQueue ;
                    andTime:(NSString*)time
                   onFinish:(void (^)(BOOL, NSString * )) finish {
     
-    dispatch_async(concurrencyQueue, ^{
-        
+    [self run_async_with_UI:^{
         NSLog(@"inserting article %@", articleId);
         [self executeUpdateOnDBwithSQLParams: INSERT_INTO_ARTICLES,
                 @"article", articleId, title, teaser, time, @"0"];
         
         finish(true, articleId);
-    });
+    }];
     
 }
 
@@ -226,16 +218,16 @@ static __strong dispatch_queue_t serialQueue ;
 -(void)updateIsReadForArticleId:(NSString *)articleId
                        onFinish:(void (^)(BOOL, NSString * )) updated {
     
-    dispatch_barrier_async(concurrencyQueue, ^{
+   [self run_async_with_UI:^{
         [self executeUpdateOnDBwithSQLParams: UPDATE_ARTICLES_SET_ISREAD_WHERE_ARTICLEID, @"1", articleId];
         updated(true, articleId);
-    });
+   }];
 }
 
 -(void) updateArticleId:(NSString *)articleId
               onUpdated:(void (^)(BOOL, NSString * )) updated {
     
-    dispatch_barrier_async(concurrencyQueue, ^{
+    [self run_async_with_UI:^{
         NSString * updateSql = [NSString stringWithFormat:
                                 @"UPDATE Articles SET %@ = '%@' WHERE %@ = '%@'",
                                 @"isRead",@"1",
@@ -243,8 +235,7 @@ static __strong dispatch_queue_t serialQueue ;
         
         [self executeUpdateOnDBwithSQLParams: updateSql];
         updated(TRUE, articleId);
-        
-    });
+    }];
 }
 
 
@@ -252,35 +243,30 @@ static __strong dispatch_queue_t serialQueue ;
 -(void)deleteArticleWithId:(NSString*)articleID
                   onFinish:(void (^)(BOOL, NSString * )) finish {
     
-    dispatch_barrier_async(concurrencyQueue, ^{
+    [self run_barrier_async_with_UI:^{
         [self executeUpdateOnDBwithSQLParams: DELETE_FROM_ARTCILES_WHERE_ARTICLEID, articleID];
         finish(true, articleID);
-    });
+    }];
 }
 
 -(void)deleteAllArticlesFromDB: (void (^)(BOOL)) finish  {
     
-    dispatch_barrier_async(concurrencyQueue, ^{
+    [self run_barrier_async_with_UI:^{
         [self executeUpdateOnDBwithSQLParams: DELETE_ALL_ARTICLES];
         finish(true);
-    });
+    }];
 }
 
 
 -(void)getArticles:(void (^)(NSArray*)) finish {
     
-    NSLog(@"getArticles <--");
-    
-    __block NSArray * allArticles;
-    
-    dispatch_barrier_async(concurrencyQueue, ^{
+    [self run_barrier_async_with_UI:^{
         
+        __block NSArray * allArticles;
         allArticles = [self getAllArticles];
         NSLog(@"getArticles received has %lu elements", (unsigned long)[allArticles count]);
         finish(allArticles);
-    });
-    
-    NSLog(@"getArticles -->");
+    }];
 }
 
 
@@ -289,10 +275,11 @@ static __strong dispatch_queue_t serialQueue ;
 
 -(void)deleteAllHealthChecksFromDB:(void (^)(BOOL)) finish {
     
-    dispatch_barrier_async(concurrencyQueue, ^{
-        [self executeUpdateOnDBwithSQLParams:DELETE_ALL_HEALTHCHECKS];
+    [self run_barrier_async_with_UI:^{
+        
+        [self executeUpdateOnDBwithSQLParams: DELETE_ALL_HEALTHCHECKS];
         finish(true);
-    });
+    }];
 }
 
 
@@ -303,15 +290,13 @@ static __strong dispatch_queue_t serialQueue ;
                        andHCCount:(NSString*)hcCount
                          onFinish:(void (^)(BOOL, NSString *)) finish {
     
-    dispatch_async(concurrencyQueue, ^{
+    [self run_async_with_UI:^{
         
         [self executeUpdateOnDBwithSQLParams:
-                INSERT_INTO_HEALTCHECKS_ID_PTNUM_MESSAGE_DATE_HCCOUNT,
-                idNum, ptNum, message, date, hcCount];
-        
+         INSERT_INTO_HEALTCHECKS_ID_PTNUM_MESSAGE_DATE_HCCOUNT,
+         idNum, ptNum, message, date, hcCount];
         finish(true, idNum);
-    });
-    
+    }];
 }
 
 -(void)insertHealthCheckWithPtNum:(NSString*)ptNum
@@ -320,15 +305,14 @@ static __strong dispatch_queue_t serialQueue ;
                        andHCCount:(NSString*)hcCount
                          onFinish:(void (^)(BOOL, NSString *)) finish {
     
-    dispatch_async(concurrencyQueue, ^{
-        
-    [self executeUpdateOnDBwithSQLParams:
-            INSERT_INTO_HEALTCHECKS_PTNUM_MESSAGE_DATE_HCCOUNT,
-            ptNum, message, date, hcCount];
-        
+    [self run_async_with_UI:^{
+            
+        [self executeUpdateOnDBwithSQLParams:
+                INSERT_INTO_HEALTCHECKS_PTNUM_MESSAGE_DATE_HCCOUNT,
+                ptNum, message, date, hcCount];
+            
         finish(true, ptNum);
-    });
-    
+    }];
 }
 
 
@@ -337,14 +321,14 @@ static __strong dispatch_queue_t serialQueue ;
                        andHCCount:(NSString*)hcCount
                          onFinish:(void (^)(BOOL, NSString *)) finish {
     
-    dispatch_async(concurrencyQueue, ^{
-        
-    [self executeUpdateOnDBwithSQLParams:
-            INSERT_INTO_HEALTHCHECKS_PTNUM_MESSAGE_HCCOUNT,
-            ptNum, message, hcCount];
-        
+    [self run_async_with_UI:^{
+            
+        [self executeUpdateOnDBwithSQLParams:
+                INSERT_INTO_HEALTHCHECKS_PTNUM_MESSAGE_HCCOUNT,
+                ptNum, message, hcCount];
+            
         finish(true, ptNum);
-    });
+    }];
 }
 
 
@@ -353,14 +337,14 @@ static __strong dispatch_queue_t serialQueue ;
                           andDate:(NSString*)date
                          onFinish:(void (^)(BOOL, NSString *)) finish {
     
-    dispatch_async(concurrencyQueue, ^{
-        
-    [self executeUpdateOnDBwithSQLParams:
-            INSERT_INTO_HEALTHCHECKS_PTNUM_MESSAGE_DATE,
-            ptNum, message, date];
-        
+    [self run_async_with_UI:^{
+            
+        [self executeUpdateOnDBwithSQLParams:
+                INSERT_INTO_HEALTHCHECKS_PTNUM_MESSAGE_DATE,
+                ptNum, message, date];
+            
         finish(true, ptNum);
-    });
+    }];
     
 }
 
@@ -368,29 +352,23 @@ static __strong dispatch_queue_t serialQueue ;
 
 - (void)getHealthChecks:(void (^)(NSArray*)) finish {
     
-    NSLog(@"getHealthChecks <--");
-
-    dispatch_barrier_async(concurrencyQueue, ^{
+    [self run_barrier_async_with_UI:^{
+        
         finish([self getAllHealthChecks]);
-    });
-    
-    NSLog(@"getHealthChecks -->");
+    }];
 }
-
-
 
 
 
 -(void)deleteHealthCheckWithID:(NSString*)healthCheckID
                       onFinish:(void (^)(BOOL, NSString *)) finish {
     
-    dispatch_barrier_async(concurrencyQueue, ^{
-        
+    [self run_barrier_async_with_UI:^{
+            
         NSLog(@"DatabaseFunctions.m - deleteHealthCheckWithID %@", healthCheckID);
         [self executeUpdateOnDBwithSQLParams: DELETE_FROM_HEALTHCHECKS_WHERE_HEALTHID, healthCheckID];
         finish(true, healthCheckID);
-    });
-    
+    }];
 }
 
 
@@ -398,8 +376,10 @@ static __strong dispatch_queue_t serialQueue ;
 
 -(void)updateStateInDB {
     
-    NSNumber * updatedateValue = [NSNumber numberWithDouble:CFAbsoluteTimeGetCurrent()];
-    [self executeUpdateOnDBwithSQLParams:UPDATE_STATE_UPDATEDATE, [updatedateValue stringValue]];
+    [self run_async_with_UI:^{
+        NSNumber * updatedateValue = [NSNumber numberWithDouble:CFAbsoluteTimeGetCurrent()];
+        [self executeUpdateOnDBwithSQLParams:UPDATE_STATE_UPDATEDATE, [updatedateValue stringValue]];
+    }];
 }
 
 
@@ -407,13 +387,16 @@ static __strong dispatch_queue_t serialQueue ;
 {
     __block NSString * updateDate;
     
-    [FMDB_Queue inDatabase:^(FMDatabase * db) { //ask the singleton fmdb queue for a valid db variable
-        FMResultSet * resultSet = [db executeQuery:SELECT_LATEST_STATE];
-        
-        //we only get 1
-        if ([resultSet next]) {
-            updateDate = [resultSet stringForColumn:@"updatedate"];
-        }
+    [self run_async_with_UI:^{
+
+        [FMDB_Queue inDatabase:^(FMDatabase * db) { //ask the singleton fmdb queue for a valid db variable
+            FMResultSet * resultSet = [db executeQuery:SELECT_LATEST_STATE];
+            
+            //we only get 1
+            if ([resultSet next]) {
+                updateDate = [resultSet stringForColumn:@"updatedate"];
+            }
+        }];
     }];
     
     return updateDate;
@@ -427,9 +410,8 @@ static __strong dispatch_queue_t serialQueue ;
 -(BOOL)CreateSchemas {
     
     __block bool schemaCreated;
-    
-    dispatch_barrier_sync(concurrencyQueue, ^{
-        
+    [self run_barrier_async_with_UI:^{
+            
         NSLog(@"CreateSchemas <--");
         
         [FMDB_Queue inDatabase:^(FMDatabase *db) {
@@ -457,7 +439,7 @@ static __strong dispatch_queue_t serialQueue ;
         
         NSLog(@"CreateSchemas -->");
         schemaCreated = true;
-    });
+    }];
     
     return schemaCreated;
 }
@@ -466,7 +448,7 @@ static __strong dispatch_queue_t serialQueue ;
 
 - (void) deleteFromAllTables:(void (^)(bool)) finish {
     
-    dispatch_barrier_async(concurrencyQueue, ^{
+    [self run_barrier_async_with_UI:^{
 
         [FMDB_Queue inTransaction:^(FMDatabase *db, BOOL *rollback) {
             [db executeUpdate:DELETE_ALL_ARTICLES];
@@ -474,8 +456,7 @@ static __strong dispatch_queue_t serialQueue ;
             [db executeUpdate:DELETE_ALL_HEALTHCHECKS];
             finish(true);
         }];
-        
-    });
+    }];
 }
 
 
@@ -596,6 +577,29 @@ static __strong dispatch_queue_t serialQueue ;
     NSLog(@"DatabaseFunctions.m - getAllPortfolios -->");
     
     return resultArray;
+}
+
+
+-(void)run_barrier_async_with_UI:(void (^)(void)) task {
+    
+    dispatch_async(dispatch_get_main_queue(), ^() {
+        dispatch_barrier_async(concurrencyQueue, ^{
+            
+            task();
+            
+        });
+    });
+}
+
+-(void)run_async_with_UI:(void (^)(void)) task {
+    
+    dispatch_async(dispatch_get_main_queue(), ^() {
+        dispatch_async(concurrencyQueue, ^{
+            
+            task();
+            
+        });
+    });
 }
 
 

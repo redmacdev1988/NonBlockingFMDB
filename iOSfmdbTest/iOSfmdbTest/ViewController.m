@@ -65,77 +65,49 @@
     
 
     for ( int i = 0; i < 100; i++) {
-
-        //put task on main queue
-        dispatch_async(dispatch_get_main_queue(), ^() {
-        
             
-            /*
-            [[DatabaseFunctions sharedDatabaseFunctions] insertHealthCheckWithIdNum:[NSString stringWithFormat:@"%d",i]
-                                                                              ptNum:@"some pt num"
-                                                                            message:@"my message to you is..."
-                                                                               date:@"2015-03-02"
-                                                                         andHCCount:@"325"
-                                                                           onFinish:^(BOOL inserted, NSString * idNum) {
-                                                                               
-            (inserted) ? NSLog(@"health check %@ inserted", idNum) : NSLog(@"health check %@ NOT inserted", idNum);
-             
-            
-             }];
-             */
-            /*
-            [[DatabaseFunctions sharedDatabaseFunctions] insertHealthCheckWithPtNum:@"some pt num"
-                                                                            message:@"message"
-                                                                            andDate:@"some date"
-                                                                           onFinish:^(BOOL inserted, NSString *ptNum) {
-                (inserted) ? NSLog(@"health check %@ inserted", ptNum) : NSLog(@"health check %@ NOT inserted", ptNum);
-            }];
-            */
-            
-            /*
-            [[DatabaseFunctions sharedDatabaseFunctions] insertHealthCheckWithPtNum:@"some pt num"
-                                                                             message:@"my message"
-                                                                          andHCCount:@"what's the count"
-                                                                            onFinish:^(BOOL inserted, NSString * ptNum) {
-                 (inserted) ? NSLog(@"health check %@ inserted", ptNum) : NSLog(@"health check %@ NOT inserted", ptNum);
-            }];
-            */
-            
-            
-    
-        });
-        
+        [[DatabaseFunctions sharedDatabaseFunctions] insertArticleWithID:[NSString stringWithFormat:@"%d",i]
+                                                               withTitle:@"some title"
+                                                                  teaser:@"teaser..."
+                                                                 andTime:@"06-03-2015"
+                                                                onFinish:^(BOOL finished, NSString * articleNum) {
+                                                                    
+                                                                    (finished) ?
+                                                                    NSLog(@"Article %@ has been inserted", articleNum) :
+                                                                    NSLog(@"uh oh, Article %@ NOT inserted :(", articleNum) ;
+                                                                }];
     }
-
-
-    //put this task on main queue
-    dispatch_async(dispatch_get_main_queue(), ^() {
-        
-        [[DatabaseFunctions sharedDatabaseFunctions] getHealthChecks:^(NSArray * allHealthChecks) {
-            NSLog(@"ALL health check RESULTS : %lu", (unsigned long)[allHealthChecks count]);
-        }];
-        
-        [[DatabaseFunctions sharedDatabaseFunctions] deleteAllHealthChecksFromDB:^(BOOL deleted) {
-            (deleted) ? NSLog(@"ALL health checks deleted") : NSLog(@"hc not deleted");;
-        }];
-        
-        [[DatabaseFunctions sharedDatabaseFunctions] getHealthChecks:^(NSArray * allHealthChecks) {
-            NSLog(@"ALL health check RESULTS : %lu", (unsigned long)[allHealthChecks count]);
-        }];
-    });
     
     
-    /*
-    //put this task on main queue
-    dispatch_async(dispatch_get_main_queue(), ^() {
-        [[DatabaseFunctions sharedDatabaseFunctions] deleteAllPortfoliosFromDB:^(BOOL deleted) {
-            (deleted) ?
-            NSLog(@"all portfolios deleted") :
-            NSLog(@"uh oh, all portfolios NOT DELETED :(") ;
-        }];
-    });
-     */
+        
+    [[DatabaseFunctions sharedDatabaseFunctions] deleteArticleWithId:@"99" onFinish:^(BOOL done, NSString * articleId) {
+        (done) ? NSLog(@"Article %@ deleted", articleId) : NSLog(@"Article %@ NOT deleted", articleId);
+    }];
     
+    [[DatabaseFunctions sharedDatabaseFunctions] deleteArticleWithId:@"98" onFinish:^(BOOL done, NSString * articleId) {
+        (done) ? NSLog(@"Article %@ deleted", articleId) : NSLog(@"Article %@ NOT deleted", articleId);
+    }];
+    
+    [[DatabaseFunctions sharedDatabaseFunctions] deleteArticleWithId:@"97" onFinish:^(BOOL done, NSString * articleId) {
+        (done) ? NSLog(@"Article %@ deleted", articleId) : NSLog(@"Article %@ NOT deleted", articleId);
+    }];
+    
+    [[DatabaseFunctions sharedDatabaseFunctions] deleteArticleWithId:@"96" onFinish:^(BOOL done, NSString * articleId) {
+        (done) ? NSLog(@"Article %@ deleted", articleId) : NSLog(@"Article %@ NOT deleted", articleId);
+    }];
+    
+    [[DatabaseFunctions sharedDatabaseFunctions] updateIsReadForArticleId:@"1" onFinish:^(BOOL updated, NSString * articleId) {
+        (updated) ? NSLog(@"%@ updated", articleId) : NSLog(@"%@ NOT updated", articleId);
+    }];
+    
+    [[DatabaseFunctions sharedDatabaseFunctions] updateIsReadForArticleId:@"2" onFinish:^(BOOL updated, NSString * articleId) {
+        (updated) ? NSLog(@"%@ updated", articleId) : NSLog(@"%@ NOT updated", articleId);
+    }];
+        
+    
+    [[DatabaseFunctions sharedDatabaseFunctions] getArticles:^(NSArray * allArticles) {
+        NSLog(@"ALL Articles RESULTS : %lu", (unsigned long)[allArticles count]);
+    }];
 
     NSLog(@"viewDidLoad -->");
 }
